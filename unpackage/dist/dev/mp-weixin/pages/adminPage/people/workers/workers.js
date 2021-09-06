@@ -94,16 +94,16 @@ var components
 try {
   components = {
     uniTable: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-table/uni-table */ "uni_modules/uni-table/components/uni-table/uni-table").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-table/uni-table.vue */ 259))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-table/uni-table */ "uni_modules/uni-table/components/uni-table/uni-table").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-table/uni-table.vue */ 285))
     },
     uniTr: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-tr/uni-tr */ "uni_modules/uni-table/components/uni-tr/uni-tr").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-tr/uni-tr.vue */ 266))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-tr/uni-tr */ "uni_modules/uni-table/components/uni-tr/uni-tr").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-tr/uni-tr.vue */ 292))
     },
     uniTh: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-th/uni-th */ "uni_modules/uni-table/components/uni-th/uni-th").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-th/uni-th.vue */ 273))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-th/uni-th */ "uni_modules/uni-table/components/uni-th/uni-th").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-th/uni-th.vue */ 299))
     },
     uniTd: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-td/uni-td */ "uni_modules/uni-table/components/uni-td/uni-td").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-td/uni-td.vue */ 280))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-table/components/uni-td/uni-td */ "uni_modules/uni-table/components/uni-td/uni-td").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-table/components/uni-td/uni-td.vue */ 306))
     }
   }
 } catch (e) {
@@ -186,6 +186,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 var _default =
 {
   data: function data() {
@@ -199,17 +202,17 @@ var _default =
         url: '/pages/adminPage/people/addWorker/addWorker' });
 
     },
-    deleteWorker: function deleteWorker(id) {
+    disableWorker: function disableWorker(id) {
       var that = this;
       uni.showModal({
-        title: '删除',
-        content: '确认删除吗',
+        title: '禁用',
+        content: '警告：禁用该维修人员后，其下所有未完成工单将被重置为“未派单”，已完成工单将会保留。同时该账号将无法登录系统。',
         success: function success(res) {
           if (res.confirm) {
             uni.showLoading({});
             var token = getApp().globalData.token;
             uni.request({
-              url: getApp().globalData.BASE_URL + '/superAdmin/deleteWorker',
+              url: getApp().globalData.BASE_URL + '/superAdmin/disableWorker',
               data: {
                 token: token,
                 id: id },
@@ -239,7 +242,7 @@ var _default =
 
                 } else if (response.data === 1) {
                   uni.showToast({
-                    title: '删除成功',
+                    title: '禁用成功',
                     duration: 2000,
                     success: function success() {
                       setTimeout(function () {
@@ -247,15 +250,70 @@ var _default =
                       }, 2000);
                     } });
 
-                } else if (response.data === -1) {
+                } else {
                   uni.showToast({
-                    title: '该维修人员已有工单，无法删除',
+                    title: '禁用失败',
                     duration: 2000,
                     icon: "none" });
 
+                }
+              } });
+
+          }
+        } });
+
+    },
+    unDisableWorker: function unDisableWorker(id) {
+      var that = this;
+      uni.showModal({
+        title: '启用',
+        content: '确认启用吗',
+        success: function success(res) {
+          if (res.confirm) {
+            uni.showLoading({});
+            var token = getApp().globalData.token;
+            uni.request({
+              url: getApp().globalData.BASE_URL + '/superAdmin/unDisableWorker',
+              data: {
+                token: token,
+                id: id },
+
+              header: {},
+              success: function success(response) {
+                console.log(response);
+                uni.hideLoading();
+                if (response.data.status === 444) {
+                  uni.showToast({
+                    title: '您的登录信息已过期，请重新登录',
+                    duration: 2000,
+                    icon: "none",
+                    success: function success() {
+                      setTimeout(function () {
+                        uni.reLaunch({
+                          url: "/pages/login/login" });
+
+                      }, 2000);
+                    } });
+
+                } else if (response.data.status === 445) {
+                  uni.showToast({
+                    title: '您没有此操作权限',
+                    duration: 2000,
+                    icon: "none" });
+
+                } else if (response.data === 1) {
+                  uni.showToast({
+                    title: '启用成功',
+                    duration: 2000,
+                    success: function success() {
+                      setTimeout(function () {
+                        that.selectWorkers();
+                      }, 2000);
+                    } });
+
                 } else {
                   uni.showToast({
-                    title: '删除失败',
+                    title: '启用失败',
                     duration: 2000,
                     icon: "none" });
 

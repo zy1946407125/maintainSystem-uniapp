@@ -102,7 +102,7 @@
 				uni.showLoading({});
 				var token = getApp().globalData.token
 				uni.request({
-					url: getApp().globalData.BASE_URL + '/admin/selectWorkers',
+					url: getApp().globalData.BASE_URL + '/admin/selectWorkers2',
 					data: {
 						token: token
 					},

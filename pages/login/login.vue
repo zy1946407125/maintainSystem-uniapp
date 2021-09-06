@@ -21,8 +21,13 @@
 			<uni-forms-item label="密码" name="password">
 				<uni-easyinput type="password" v-model="formData.password" placeholder="请输入密码" />
 			</uni-forms-item>
-			<button @click="submit" type="primary">登录</button>
 		</uni-forms>
+		<view style="display: flex;flex-direction: row;">
+			<view style="width: 150rpx;"></view>
+			<uni-data-checkbox multiple v-model="value" :localdata="range" @change="change"></uni-data-checkbox>
+		</view>
+		<view style="height: 50rpx;"></view>
+		<button @click="submit" type="primary">登录</button>
 	</view>
 </template>
 
@@ -30,6 +35,12 @@
 	export default {
 		data() {
 			return {
+				value: [0],
+				range: [{
+					"value": 0,
+					"text": "记住密码"
+				}],
+				flag: true,
 				type: ['管理员', '维修人员', '部门负责人', '普通用户'],
 				index: 0,
 				formData: {
@@ -39,7 +50,7 @@
 				rules: {
 					phone: {
 						rules: [{
-							format: 'number',
+							required: true,
 							errorMessage: '请输入手机号',
 						}, ]
 					},
@@ -53,6 +64,17 @@
 			}
 		},
 		methods: {
+			change(e) {
+				console.log(e)
+				console.log(e.detail.data.length)
+				if (e.detail.data.length == 0) {
+					this.flag = false
+				}
+				if (e.detail.data.length == 1) {
+					this.flag = true
+				}
+				console.log(this.flag)
+			},
 			bindPickerChange: function(e) {
 				console.log('picker发送选择改变，携带值为', e.target.value)
 				this.index = e.target.value
@@ -75,7 +97,7 @@
 						title: '正在登录...'
 					});
 					uni.request({
-						url: getApp().globalData.BASE_URL + '/user/login', 
+						url: getApp().globalData.BASE_URL + '/user/login',
 						data: {
 							phone: res.phone,
 							password: res.password
@@ -97,6 +119,40 @@
 										getApp().globalData.loginState = response.data.status
 										getApp().globalData.user = response.data.user
 										getApp().globalData.token = response.data.token
+
+										response.data.user.password = res.password
+
+										if (that.flag == true) {
+											//缓存用户信息
+											console.log("缓存用户信息")
+											try {
+												uni.setStorageSync('user', response.data.user)
+											} catch (e) {
+												// error
+												console.log("缓存用户信息失败")
+											}
+
+											try {
+												uni.setStorageSync('typeIndex', that.index)
+											} catch (e) {
+												// error
+												console.log("缓存用户类别失败")
+											}
+										}else{
+											console.log("清空用户缓存信息")
+											try {
+											    uni.removeStorageSync('user');
+											} catch (e) {
+											    // error
+												console.log("清空用户信息失败")
+											}
+											try {
+											    uni.removeStorageSync('typeIndex');
+											} catch (e) {
+											    // error
+												console.log("清空用户类别失败")
+											}
+										}
 
 										const url = '/pages/' + role + 'Page/' + role + 'Index/' + role +
 											'Index'
@@ -130,6 +186,33 @@
 					console.log('表单错误信息：', err);
 				})
 			},
+		},
+		created() {
+			try {
+				const user = uni.getStorageSync('user');
+				console.log(user)
+				if (user == '') {
+					console.log("用户信息没有缓存")
+				} else {
+					console.log("用户信息有缓存")
+					this.formData.phone = user.phone
+					this.formData.password = user.password
+				}
+			} catch (e) {
+				console.log(e)
+			}
+			try {
+				const typeIndex = uni.getStorageSync('typeIndex');
+				console.log(typeIndex)
+				if (typeIndex == '') {
+					console.log("用户类别没有缓存")
+				} else {
+					console.log("用户类别有缓存")
+					this.index = typeIndex
+				}
+			} catch (e) {
+				console.log(e)
+			}
 		}
 	}
 </script>

@@ -81,7 +81,7 @@
 							plain="true" @click="lookImg(item.imgsfileids1)">查看申报图片</button>
 						<button size="mini" :disabled="item.imgsfileids2==null||item.imgsfileids2=='[]'" type="primary"
 							plain="true" @click="lookImg(item.imgsfileids2)">查看维修图片</button>
-						<button size="mini" :disabled="item.status=='已完成'||item.status=='管理员已撤单'||item.status=='工人已撤单'||item.status=='用户已撤单'" type="primary" plain="true"
+						<button size="mini" :disabled="item.status=='已完成'||item.status=='管理员已撤单'||item.status=='工人已退单'||item.status=='用户已撤单'" type="primary" plain="true"
 							@click="cancelOrder(item.id)">撤单</button>
 					</uni-td>
 				</uni-tr>

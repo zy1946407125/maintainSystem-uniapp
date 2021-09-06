@@ -98,6 +98,19 @@
 									icon: "none"
 								});
 							} else if (response.data === 1) {
+								console.log("清空用户缓存信息")
+								try {
+								    uni.removeStorageSync('user');
+								} catch (e) {
+								    // error
+									console.log("清空用户信息失败")
+								}
+								try {
+								    uni.removeStorageSync('typeIndex');
+								} catch (e) {
+								    // error
+									console.log("清空用户类别失败")
+								}
 								uni.showToast({
 									title: '修改成功',
 									duration: 2000,

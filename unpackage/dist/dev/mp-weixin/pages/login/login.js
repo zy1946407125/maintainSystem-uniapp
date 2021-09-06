@@ -101,13 +101,16 @@ var components
 try {
   components = {
     uniForms: function() {
-      return Promise.all(/*! import() | uni_modules/uni-forms/components/uni-forms/uni-forms */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-forms/components/uni-forms/uni-forms")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-forms/components/uni-forms/uni-forms.vue */ 213))
+      return Promise.all(/*! import() | uni_modules/uni-forms/components/uni-forms/uni-forms */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-forms/components/uni-forms/uni-forms")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-forms/components/uni-forms/uni-forms.vue */ 227))
     },
     uniFormsItem: function() {
-      return Promise.all(/*! import() | uni_modules/uni-forms/components/uni-forms-item/uni-forms-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-forms/components/uni-forms-item/uni-forms-item")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue */ 224))
+      return Promise.all(/*! import() | uni_modules/uni-forms/components/uni-forms-item/uni-forms-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-forms/components/uni-forms-item/uni-forms-item")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-forms/components/uni-forms-item/uni-forms-item.vue */ 238))
     },
     uniEasyinput: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput */ "uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue */ 231))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput */ "uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-easyinput/components/uni-easyinput/uni-easyinput.vue */ 245))
+    },
+    uniDataCheckbox: function() {
+      return Promise.all(/*! import() | uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-data-checkbox/components/uni-data-checkbox/uni-data-checkbox.vue */ 252))
     }
   }
 } catch (e) {
@@ -190,10 +193,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 var _default =
 {
   data: function data() {
     return {
+      value: [0],
+      range: [{
+        "value": 0,
+        "text": "记住密码" }],
+
+      flag: true,
       type: ['管理员', '维修人员', '部门负责人', '普通用户'],
       index: 0,
       formData: {
@@ -203,7 +217,7 @@ var _default =
       rules: {
         phone: {
           rules: [{
-            format: 'number',
+            required: true,
             errorMessage: '请输入手机号' }] },
 
 
@@ -217,6 +231,17 @@ var _default =
 
   },
   methods: {
+    change: function change(e) {
+      console.log(e);
+      console.log(e.detail.data.length);
+      if (e.detail.data.length == 0) {
+        this.flag = false;
+      }
+      if (e.detail.data.length == 1) {
+        this.flag = true;
+      }
+      console.log(this.flag);
+    },
     bindPickerChange: function bindPickerChange(e) {
       console.log('picker发送选择改变，携带值为', e.target.value);
       this.index = e.target.value;
@@ -262,6 +287,40 @@ var _default =
                   getApp().globalData.user = response.data.user;
                   getApp().globalData.token = response.data.token;
 
+                  response.data.user.password = res.password;
+
+                  if (that.flag == true) {
+                    //缓存用户信息
+                    console.log("缓存用户信息");
+                    try {
+                      uni.setStorageSync('user', response.data.user);
+                    } catch (e) {
+                      // error
+                      console.log("缓存用户信息失败");
+                    }
+
+                    try {
+                      uni.setStorageSync('typeIndex', that.index);
+                    } catch (e) {
+                      // error
+                      console.log("缓存用户类别失败");
+                    }
+                  } else {
+                    console.log("清空用户缓存信息");
+                    try {
+                      uni.removeStorageSync('user');
+                    } catch (e) {
+                      // error
+                      console.log("清空用户信息失败");
+                    }
+                    try {
+                      uni.removeStorageSync('typeIndex');
+                    } catch (e) {
+                      // error
+                      console.log("清空用户类别失败");
+                    }
+                  }
+
                   var url = '/pages/' + role + 'Page/' + role + 'Index/' + role +
                   'Index';
                   console.log(url);
@@ -293,7 +352,35 @@ var _default =
       }).catch(function (err) {
         console.log('表单错误信息：', err);
       });
-    } } };exports.default = _default;
+    } },
+
+  created: function created() {
+    try {
+      var user = uni.getStorageSync('user');
+      console.log(user);
+      if (user == '') {
+        console.log("用户信息没有缓存");
+      } else {
+        console.log("用户信息有缓存");
+        this.formData.phone = user.phone;
+        this.formData.password = user.password;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    try {
+      var typeIndex = uni.getStorageSync('typeIndex');
+      console.log(typeIndex);
+      if (typeIndex == '') {
+        console.log("用户类别没有缓存");
+      } else {
+        console.log("用户类别有缓存");
+        this.index = typeIndex;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ })

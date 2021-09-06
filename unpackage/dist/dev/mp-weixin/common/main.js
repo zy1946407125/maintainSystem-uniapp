@@ -91,6 +91,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 {
   globalData: {
     // BASE_URL: 'https://localhost:8081/maintainSystem',
+    // BASE_URL: 'http://localhost:8081/maintainSystem',
     // BASE_URL: 'https://magic233.top/maintainSystem',
     BASE_URL: 'https://wx.hngayjy.com/maintainSystem' },
 
