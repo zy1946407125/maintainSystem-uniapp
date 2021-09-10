@@ -9,6 +9,7 @@
 				<uni-th align="center">姓名</uni-th>
 				<uni-th align="center">所在部门</uni-th>
 				<uni-th align="center">联系方式</uni-th>
+				<uni-th align="center">状态</uni-th>
 				<uni-th align="center">操作</uni-th>
 			</uni-tr>
 			<!-- 表格数据行 -->
@@ -17,7 +18,10 @@
 				<uni-td>{{item.username}}</uni-td>
 				<uni-td>{{item.dept}}</uni-td>
 				<uni-td>{{item.phone}}</uni-td>
-				<uni-td><button type="primary" plain="true" @click="deleteDeptUser(item.id)">删除</button></uni-td>
+				<uni-td>{{item.status}}</uni-td>
+				<uni-td v-if="item.status=='启用'"><button type="warn" @click="disableUser(item)">禁用</button></uni-td>
+				<uni-td v-if="item.status=='禁用'"><button type="primary" @click="unDisableUser(item)">启用</button>
+				</uni-td>
 			</uni-tr>
 		</uni-table>
 		</script>
@@ -37,20 +41,20 @@
 					url: '/pages/managerPage/people/addDeptUser/addDeptUser'
 				})
 			},
-			deleteDeptUser(id) {
+			disableUser(item) {
 				const that = this
 				uni.showModal({
-					title: '删除',
-					content: '确认删除吗',
+					title: '禁用',
+					content: '警告：禁用该用户后，该账号将无法登录系统。',
 					success: function(res) {
 						if (res.confirm) {
 							uni.showLoading({});
 							var token = getApp().globalData.token
 							uni.request({
-								url: getApp().globalData.BASE_URL + '/manager/deleteDeptUser',
+								url: getApp().globalData.BASE_URL + '/manager/disableUser',
 								data: {
 									token: token,
-									id: id
+									id: item.id
 								},
 								header: {},
 								success(response) {
@@ -75,25 +79,136 @@
 											duration: 2000,
 											icon: "none"
 										});
-									} else if (response.data === 1) {
+									} else if (response.data === 101) {
 										uni.showToast({
-											title: '删除成功',
-											duration: 2000,
-											success() {
-												setTimeout(function() {
-													that.selectDeptUsers()
-												}, 2000)
-											}
-										});
-									} else if (response.data === -1) {
-										uni.showToast({
-											title: '该用户存在工单，无法删除',
+											title: '非法禁用管理员',
 											duration: 2000,
 											icon: "none"
 										});
+									} else if (response.data === 102) {
+										uni.showToast({
+											title: '非法禁用维修人员',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 103) {
+										uni.showToast({
+											title: '非法禁用部门负责人',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 104) {
+										uni.showToast({
+											title: '非法禁用非本系部人员',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 105) {
+										uni.showToast({
+											title: '非法禁用本人',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 1) {
+										uni.showToast({
+											title: '禁用成功',
+											duration: 2000,
+											success() {
+												// setTimeout(function() {
+												// 	that.selectWorkers()
+												// }, 2000)
+												item.status = "禁用"
+											}
+										});
 									} else {
 										uni.showToast({
-											title: '删除失败',
+											title: '禁用失败',
+											duration: 2000,
+											icon: "none"
+										});
+									}
+								}
+							})
+						}
+					}
+				});
+			},
+			unDisableUser(item) {
+				const that = this
+				uni.showModal({
+					title: '启用',
+					content: '确认启用吗',
+					success: function(res) {
+						if (res.confirm) {
+							uni.showLoading({});
+							var token = getApp().globalData.token
+							uni.request({
+								url: getApp().globalData.BASE_URL + '/manager/unDisableUser',
+								data: {
+									token: token,
+									id: item.id
+								},
+								header: {},
+								success(response) {
+									console.log(response)
+									uni.hideLoading()
+									if (response.data.status === 444) {
+										uni.showToast({
+											title: '您的登录信息已过期，请重新登录',
+											duration: 2000,
+											icon: "none",
+											success() {
+												setTimeout(function() {
+													uni.reLaunch({
+														url: "/pages/login/login",
+													})
+												}, 2000)
+											}
+										});
+									} else if (response.data.status === 445) {
+										uni.showToast({
+											title: '您没有此操作权限',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 101) {
+										uni.showToast({
+											title: '非法启用管理员',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 102) {
+										uni.showToast({
+											title: '非法启用维修人员',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 103) {
+										uni.showToast({
+											title: '非法禁用部门负责人',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 104) {
+										uni.showToast({
+											title: '非法启用非本系部人员',
+											duration: 2000,
+											icon: "none"
+										});
+									} else if (response.data === 1) {
+										uni.showToast({
+											title: '启用成功',
+											duration: 2000,
+											success() {
+												// setTimeout(function() {
+												// 	that.selectWorkers()
+												// }, 2000)
+												item.status = "启用"
+											}
+										});
+									} else {
+										uni.showToast({
+											title: '启用失败',
 											duration: 2000,
 											icon: "none"
 										});
